@@ -5,3 +5,12 @@ Deeply ugly Makefile.
 Almost not tested.
 You've been warned.
 
+Requirements
+- python (tested with 2.6) with ctypes: http://www.python.org
+- libinnodb (tested with 1.0.6.6750, protocol version 3.0.0):
+  http://www.innodb.com/wp/2009/06/24/embedded-innodb-1-0-3-5325-released/
+  (warning: site seems severly out of date)
+- python-enum: https://github.com/vpelletier/python-enum
+
+Tested on linux x86_64, debian sid.
+
