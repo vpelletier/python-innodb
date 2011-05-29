@@ -1,3 +1,7 @@
+"""
+Comes from "test0aux.c", provided with libinnodb source.
+"""
+
 import os
 import sys
 import ctypes

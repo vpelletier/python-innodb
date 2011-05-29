@@ -1,4 +1,15 @@
 #!/usr/bin/env python
+"""
+Simple test case:
+- creata database
+- create table
+- insert rows
+- update row
+- delete row
+- drop table
+
+Comes from "ib_test1.c", provided with libinnodb source.
+"""
 from ctypes import byref, sizeof, Structure, c_char
 import sys
 import innodb
