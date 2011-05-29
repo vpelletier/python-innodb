@@ -10,7 +10,7 @@ Simple test case:
 
 Comes from "ib_test1.c", provided with libinnodb source.
 """
-from ctypes import byref, sizeof, Structure, c_char
+from ctypes import byref, sizeof, Structure, c_char, c_int, string_at
 import sys
 import innodb
 import libinnodb
@@ -110,6 +110,54 @@ def do_query(crsr):
             break
     innodb.tuple_delete(tpl)
 
+def update_a_row(crsr):
+    res = c_int()
+    key_tpl = innodb.sec_search_tuple_create(crsr)
+    assert key_tpl
+    innodb.col_set_value(key_tpl, 0, 'a', 1)
+    innodb.cursor_moveto(crsr, key_tpl, libinnodb.IB_CUR_GE, byref(res))
+    assert res.value == -1
+    if key_tpl:
+        innodb.tuple_delete(key_tpl)
+    old_tpl = innodb.clust_read_tuple_create(crsr)
+    assert old_tpl
+    new_tpl = innodb.clust_read_tuple_create(crsr)
+    assert new_tpl
+    while True:
+        innodb.cursor_read_row(crsr, old_tpl)
+        c1_len, col_meta = innodb.col_get_meta(old_tpl, 0)
+        c1 = string_at(innodb.col_get_value(old_tpl, 0), c1_len)
+        assert c1
+        if c1 != 'a':
+            break
+        innodb.tuple_copy(new_tpl, old_tpl)
+        data_len, col_meta = innodb.col_get_meta(old_tpl, 2)
+        assert data_len != libinnodb.IB_SQL_NULL
+        c3 = innodb.tuple_read_u32(old_tpl, 2) + 100
+        innodb.tuple_write_u32(new_tpl, 2, c3)
+        innodb.cursor_update_row(crsr, old_tpl, new_tpl)
+        innodb.cursor_next(crsr)
+        old_tpl = innodb.tuple_clear(old_tpl)
+        assert old_tpl
+        new_tpl = innodb.tuple_clear(new_tpl)
+        assert new_tpl
+    if old_tpl:
+        innodb.tuple_delete(old_tpl)
+    if new_tpl:
+        innodb.tuple_delete(new_tpl)
+
+def delete_a_row(crsr):
+    res = c_int()
+    key_tpl = innodb.sec_search_tuple_create(crsr)
+    assert key_tpl
+    innodb.col_set_value(key_tpl, 0, 'b', 1)
+    innodb.col_set_value(key_tpl, 1, 'z', 1)
+    innodb.cursor_moveto(crsr, key_tpl, libinnodb.IB_CUR_GE, byref(res))
+    assert res.value == 0
+    if key_tpl:
+        innodb.tuple_delete(key_tpl)
+    innodb.cursor_delete_row(crsr)
+
 def main():
     crsr = libinnodb.ib_crsr_t()
     ib_trx = libinnodb.ib_trx_t()
@@ -131,14 +179,14 @@ def main():
     insert_rows(crsr)
     print 'Query table'
     do_query(crsr)
-    #print 'Update a row'
-    #update_a_row(crsr)
-    #print 'Query table'
-    #do_query(crsr)
-    #print 'Delete a row'
-    #delete_a_row(crsr)
-    #print 'Query table'
-    #do_query(crsr)
+    print 'Update a row'
+    update_a_row(crsr)
+    print 'Query table'
+    do_query(crsr)
+    print 'Delete a row'
+    delete_a_row(crsr)
+    print 'Query table'
+    do_query(crsr)
     print 'Close cursor'
     innodb.cursor_close(crsr)
     print 'Commit transaction'
