@@ -3,6 +3,7 @@ Python ctypes-based wrapper for libinnodb.
 Severe "works for me" state.
 Deeply ugly Makefile.
 Almost not tested.
+API *will* change when I get a good idea of how things work in libinnodb.
 You've been warned.
 
 Requirements
