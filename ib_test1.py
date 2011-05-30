@@ -42,9 +42,6 @@ in_rows = [
 def COL_LEN(n):
     return getattr(row_t, n).size
 
-def create_database(name):
-    innodb.database_create(name)
-
 def create_table(dbname, name):
     table_id = libinnodb.ib_id_t(0)
     ib_tbl_sch = libinnodb.ib_tbl_sch_t(None)
@@ -165,7 +162,7 @@ def main():
     innodb.init()
     test0aux.test_configure()
     innodb.startup('barracuda')
-    create_database(DATABASE)
+    innodb.database_create(DATABASE)
     print 'Create table'
     create_table(DATABASE, TABLE)
     print 'Begin transaction'
