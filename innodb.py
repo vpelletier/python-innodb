@@ -534,6 +534,9 @@ class BaseCursor(object):
     def close(self):
         cursor_close(self._cursor)
 
+    def setMatchMode(self, mode):
+        cursor_set_match_mode(self._cursor, mode)
+
     def _setSimpleSelect(self):
         libinnodb.ib_cursor_set_simple_select(self._cursor)
 
