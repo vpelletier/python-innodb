@@ -18,7 +18,7 @@ def test_configure():
     except OSError, (err, msg):
         if err != 17:
             raise
-    if platform.system() == 'Windows':
+    if platform.system() != 'Windows':
         flush_method = 'O_DIRECT'
     else:
         flush_method = 'async_unbuffered'
