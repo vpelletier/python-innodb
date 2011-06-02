@@ -635,7 +635,7 @@ class BaseTuple(object):
         elif col_type == libinnodb.IB_FLOAT:
             result = tuple_read_float(self._tuple, index)
         elif col_type == libinnodb.IB_DOUBLE:
-            result = innodb.tuple_read_double(self._tuple, index)
+            result = tuple_read_double(self._tuple, index)
         elif col_type in (libinnodb.IB_CHAR, libinnodb.IB_BLOB,
                 libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR):
             result = ctypes.string_at(col_get_value(
@@ -656,7 +656,7 @@ class BaseTuple(object):
         elif col_type == libinnodb.IB_FLOAT:
             tuple_write_float(self._tuple, index, value)
         elif col_type == libinnodb.IB_DOUBLE:
-            innodb.tuple_value_double(self._tuple, index, value)
+            tuple_write_double(self._tuple, index, value)
         elif col_type in (libinnodb.IB_CHAR, libinnodb.IB_BLOB,
                 libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR):
             col_set_value(self._tuple, index, value, len(value))
