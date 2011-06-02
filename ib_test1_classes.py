@@ -53,7 +53,7 @@ def main():
     print 'API: %d.%d.%d' % innodb.api_version()
     idb = innodb.InnoDB()
     test0aux.test_configure()
-    innodb.startup('barracuda')
+    idb.startup('barracuda')
     db = idb[DATABASE]
     db.create()
     print 'Create table'
