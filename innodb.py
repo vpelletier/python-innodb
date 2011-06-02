@@ -534,6 +534,9 @@ class BaseCursor(object):
     def _setSimpleSelect(self):
         libinnodb.ib_cursor_set_simple_select(self._cursor)
 
+    def takeSnapshot(self):
+        libinnodb.ib_cursor_stmt_begin(self._cursor)
+
     def __del__(self):
         if _is_started and self._cursor:
             self.close()
