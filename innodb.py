@@ -18,11 +18,13 @@ def api_version():
 trx_begin = libinnodb.ib_trx_begin
 table_schema_delete = libinnodb.ib_table_schema_delete
 clust_read_tuple_create = libinnodb.ib_clust_read_tuple_create
+clust_search_tuple_create = libinnodb.ib_clust_search_tuple_create
+sec_read_tuple_create = libinnodb.ib_sec_read_tuple_create
+sec_search_tuple_create = libinnodb.ib_sec_search_tuple_create
 tuple_clear = libinnodb.ib_tuple_clear
 tuple_delete = libinnodb.ib_tuple_delete
 tuple_get_n_cols = libinnodb.ib_tuple_get_n_cols
 col_get_value = libinnodb.ib_col_get_value
-sec_search_tuple_create = libinnodb.ib_sec_search_tuple_create
 def database_create(name):
     if not libinnodb.ib_database_create(name):
         raise InnoDBError(libinnodb.DB_ERROR)
