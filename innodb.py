@@ -307,6 +307,8 @@ class Table(object):
     def open(self, transaction, read_only=False):
         return TableCursor(self._name, transaction, read_only)
 
+    def openSecondaryIndex(self, transaction, name, read_only=False):
+        return IndexCursor(self._getIndexId(name), transaction, read_only)
 
     def newSchema(self, fmt=libinnodb.IB_TBL_COMPACT, page_size=0,
             column_list=()):
@@ -572,6 +574,20 @@ class TableCursor(BaseCursor):
 
     def delete(self):
         cursor_delete_row(self._cursor)
+
+class IndexCursor(BaseCursor):
+    def __init__(self, index_id, transaction, read_only=False):
+        self._cursor = cursor = libinnodb.ib_crsr_t()
+        cursor_open_index_using_id(index_id, transaction._txn_id,
+            ctypes.byref(cursor))
+        if read_only:
+            self._setSimpleSelect()
+
+    def getReadTuple(self):
+        return SecondaryReadTuple(self._cursor)
+
+    def getSearchTuple(self):
+        return SecondarySearchTuple(self._cursor)
 
 _read_int = {
     (1, libinnodb.IB_COL_UNSIGNED): tuple_read_u8,
