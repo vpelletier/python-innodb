@@ -298,8 +298,9 @@ class Table(object):
         table_truncate(self._name, ctypes.byref(table_id))
         # TODO: notify cursor instances of table truncation ?
 
-    def open(self, transaction):
-        return TableCursor(self._name, transaction)
+    def open(self, transaction, read_only=False):
+        return TableCursor(self._name, transaction, read_only)
+
 
     def newSchema(self, fmt=libinnodb.IB_TBL_COMPACT, page_size=0,
             column_list=()):
@@ -497,16 +498,21 @@ class BaseCursor(object):
     def close(self):
         cursor_close(self._cursor)
 
+    def _setSimpleSelect(self):
+        libinnodb.ib_cursor_set_simple_select(self._cursor)
+
     def __del__(self):
         if _is_started and self._cursor:
             self.close()
 
 class TableCursor(BaseCursor):
-    def __init__(self, table, transaction):
+    def __init__(self, table, transaction, read_only=False):
         self._table = table
         self._cursor = cursor = libinnodb.ib_crsr_t()
         cursor_open_table(table, transaction._txn_id,
             ctypes.byref(cursor))
+        if read_only:
+            self._setSimpleSelect()
 
     def getReadTuple(self):
         return ClusterReadTuple(self._cursor)
