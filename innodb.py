@@ -359,6 +359,18 @@ class Transaction(object):
         trx_rollback(self._txn_id)
         self._txn_id = None
 
+    def createSavepoint(self, name):
+        libinnodb.ib_savepoint_take(self._txn_id, name, len(name))
+
+    def rollbackToSavepoint(self, name):
+        savepoint_rollback(self._txn_id, name, len(name))
+
+    def releaseSavepoint(self, name):
+        savepoint_release(self._txn_id, name, len(name))
+
+    def lockTable(self, table_id, mode):
+        table_lock(self._txn_id, table_id, mode)
+
     def lockSchema(self, exclusive=False):
         if exclusive:
             schema_lock_exclusive(self._txn_id)
