@@ -1,4 +1,5 @@
 import ctypes
+import platform
 import libinnodb
 
 class InnoDBError(Exception):
@@ -60,6 +61,22 @@ for func_name in dir(libinnodb):
     if getattr(func, 'restype', None) is not ib_err_t:
         continue
     _global_dict[dest_func_name] = new_wrapper(func)
+
+if platform.system() == 'Windows':
+    # TODO
+    pass
+else:
+    _wrapped_cfg_get_all = cfg_get_all
+    _free = ctypes.CDLL('libc.so.6').free
+    _free.restype = None
+    _free.argtypes = [ctypes.c_void_p]
+    def cfg_get_all():
+        number = libinnodb.ib_u32_t()
+        name_list = ctypes.POINTER(ctypes.c_char_p)()
+        _wrapped_cfg_get_all(ctypes.byref(name_list), ctypes.byref(number))
+        result = [name_list[x] for x in xrange(number.value)]
+        _free(name_list)
+        return result
 
 _wrapped_tuple_read_float = tuple_read_float
 def tuple_read_float(tpl, i):
@@ -134,6 +151,15 @@ def _checkName(name):
 _is_initialised = False
 _is_started = False
 
+_option_dict = {
+    libinnodb.IB_CFG_IBOOL: (libinnodb.ib_cfg_set_bool, libinnodb.ib_bool_t),
+    libinnodb.IB_CFG_ULINT: (libinnodb.ib_cfg_set_int, libinnodb.ib_ulint_t),
+    # XXX: not explicitely mentioned in specs
+    libinnodb.IB_CFG_ULONG: (libinnodb.ib_cfg_set_int, libinnodb.ib_ulint_t),
+    libinnodb.IB_CFG_TEXT: (libinnodb.ib_cfg_set_text, ctypes.c_char_p),
+    libinnodb.IB_CFG_CB: (libinnodb.ib_cfg_set_callback, libinnodb.ib_cb_t),
+}
+
 class InnoDB(object):
     def __init__(self):
         global _is_initialised
@@ -150,6 +176,24 @@ class InnoDB(object):
         global _is_started
         shutdown(mode)
         _is_started = False
+
+    def getOptionType(self, name):
+        option_type = libinnodb.ib_cfg_type_t()
+        cfg_var_get_type(name, ctypes.byref(option_type))
+        return option_type.value
+
+    def setOption(self, name, value):
+        setter, c_type = _option_dict[self.getOptionType(name)]
+        setter(c_type(value))
+
+    def getOption(self, name):
+        _, c_type = _option_dict[self.getOptionType(name)]
+        value = c_type()
+        cfg_get(name, ctypes.byref(value))
+        return getattr(value, 'value', value)
+
+    def getOptionNameList(self):
+        return cfg_get_all()
 
     def __getitem__(self, name):
         _checkName(name)

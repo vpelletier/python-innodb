@@ -661,14 +661,14 @@ _devaarg_charp__charp.argtypes = [c_void_p, c_char_p, c_char_p]
 def ib_cfg_set_int(name, v):
     return _devaarg_charp__int(_ib_cfg_set, name, v)
 
-def _ib_cfg_set_bool(name, v):
+def ib_cfg_set_bool(name, v):
     return _devaarg_charp__ulint(_ib_cfg_set, name, v)
 
 def ib_cfg_set_bool_on(name):
-    return _ib_cfg_set_bool(name, IB_TRUE)
+    return ib_cfg_set_bool(name, IB_TRUE)
 
 def ib_cfg_set_bool_off(name):
-    return _ib_cfg_set_bool(name, IB_FALSE)
+    return ib_cfg_set_bool(name, IB_FALSE)
 
 def ib_cfg_set_text(name, v):
     return _devaarg_charp__charp(_ib_cfg_set, name, v)
