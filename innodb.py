@@ -5,8 +5,9 @@ import libinnodb
 class InnoDBError(Exception):
     def __init__(self, error_code):
         self._error_code = error_code
-        super(InnoDBError, self).__init__('%s (%s)',
-            libinnodb.db_err(error_code), error_code)
+        super(InnoDBError, self).__init__('%s (%s): %s',
+            libinnodb.db_err(error_code), error_code,
+            innodb.ib_strerror(error_code))
 
     def getErrorCode(self):
         return self._error_code
