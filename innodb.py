@@ -337,6 +337,8 @@ class Transaction(object):
         self._level = level
 
     def begin(self):
+        if _txn_id is not None:
+            raise ValueError('Transaction already started')
         txn_id = trx_begin(self._level)
         if not txn_id:
             raise ValueError('Could not begin transaction')
