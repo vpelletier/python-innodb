@@ -377,6 +377,17 @@ class Transaction(object):
         else:
             schema_lock_shared(self._txn_id)
 
+    def hasExclusiveSchemaLock(self):
+        result = libinnodb.ib_schema_lock_is_exclusive(self._txn_id)
+        return bool(result.value)
+
+    def hasSharedSchemaLock(self):
+        result = libinnodb.ib_schema_lock_is_shared(self._txn_id)
+        return bool(result.value)
+
+    def unlockSchema(self):
+        schema_unlock(self._txn_id)
+
     def __del__(self):
         if _is_started and self._txn_id is not None:
             if self.getState() == libinnodb.IB_TRX_NOT_STARTED:
