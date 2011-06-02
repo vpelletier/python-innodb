@@ -624,16 +624,6 @@ ib_cfg_var_get_type.restype = ib_err_t
 ib_cfg_var_get_type.argtypes = [c_char_p, POINTER(ib_cfg_type_t)]
 
 _ib_cfg_set = libinnodb.ib_cfg_set
-#ib_cfg_set.restype = ib_err_t
-#ib_cfg_set.argtypes = [c_char_p] # va_arg implicit
-#ib_cfg_set_int = ib_cfg_set
-#ib_cfg_set_text = ib_cfg_set
-#def ib_cfg_set_bool_on(name):
-#    return ib_cfg_set(name, IB_TRUE)
-#def ib_cfg_set_bool_off(name):
-#    return ib_cfg_set(name, IB_FALSE)
-#ib_cfg_set_callback = ib_cfg_set
-
 # XXX: due to lack of support for va_arg in ctypes (highly non-trivial to
 # implement), use an intermediate wrapper C library.
 def _open_devaarg():
