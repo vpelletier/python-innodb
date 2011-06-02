@@ -308,6 +308,14 @@ class Table(object):
             sch.addColumn(*column_args)
         return sch
 
+    def newIndex(self, transaction, name, column_list=(), clustered=False,
+            unique=False):
+        index_schema_id = libinnodb.ib_idx_sch_t()
+        index_schema_create(transaction._txn_id, self._name, name,
+            ctypes.byref(index_schema_id))
+        return IndexSchema(index_schema_id, True, column_list, clustered,
+            unique)
+
 class Transaction(object):
     _txn_id = None
 
@@ -368,31 +376,51 @@ class TableSchema(object):
         table_schema_add_col(self._schema, name, col_type, attributes, client,
             length)
 
-    def newIndex(self, name, column_list=(), clustered=False):
+    def newIndex(self, name, column_list=(), clustered=False, unique=False):
         index_schema_id = libinnodb.ib_idx_sch_t()
         table_schema_add_index(self._schema, name,
             ctypes.byref(index_schema_id))
         self._index_list.append(index_schema_id)
-        index_schema = IndexSchema(index_schema_id)
-        for column_args in column_list:
-            index_schema.addColumn(*column_args)
-        if clustered:
-            index_schema.setClustered()
-        return index_schema
+        return IndexSchema(index_schema_id, False, column_list, clustered,
+            unique)
 
     def __del__(self):
         if _is_started and self._schema:
             table_schema_delete(self._schema)
 
 class IndexSchema(object):
-    def __init__(self, index_schema_id):
+    def __init__(self, index_schema_id, free_on_del, column_list=(),
+            clustered=False, unique=False):
+        self._free_on_del = free_on_del
         self._schema = index_schema_id
+        for column_args in column_list:
+            self.addColumn(*column_args)
+        if clustered:
+            self.setClustered()
+        if unique:
+            self.setUnique()
 
     def addColumn(self, name, prefix=0):
         index_schema_add_col(self._schema, name, prefix)
 
     def setClustered(self):
         index_schema_set_clustered(self._schema)
+
+    def setUnique(self):
+        index_schema_set_unique(self._schema)
+
+    def create(self):
+        if not free_on_del:
+            raise ValueError('You do not need to explicitely add an index '
+                'when it is part of a table schema. It will be created along '
+                'with table.')
+        index_id = libinnodb.ib_id_t()
+        index_create(self._schema, ctypes.byref(index_id))
+        return index_id.value
+
+    def __del__(self):
+        if self._free_on_del:
+           index_schema_delete(self._schema)
 
 class BaseCursor(object):
     def __init__(self):
