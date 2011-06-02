@@ -145,7 +145,8 @@ def tuple_read_i64(tpl, i):
 # TODO: cstring-safe
 
 def _checkName(name):
-    if '/' in name or '\0' in name or \
+    # XXX: incomplete checks
+    if '/' in name or '\0' in name or '\\' in name or \
             len(name) > libinnodb.IB_MAX_TABLE_NAME_LEN:
         raise ValueError('Invalid name: %r' % (name, ))
 
