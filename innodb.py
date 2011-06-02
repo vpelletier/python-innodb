@@ -641,15 +641,23 @@ class ClusterReadTuple(BaseTuple):
         super(ClusterReadTuple, self).__init__(
             clust_read_tuple_create(cursor))
 
-class ClusterSearchTuple(BaseTuple):
-    def __init__(self, cursor):
-        super(ClusterSearchTuple, self).__init__(
-            clust_search_tuple_create(cursor))
+def ClusterSearchTuple(cursor):
+    return _ClusterSearchTuple(clust_search_tuple_create(cursor))
+
+class _ClusterSearchTuple(BaseTuple):
+    def __init__(self, tpl):
+        super(ClusterSearchTuple, self).__init__(tpl)
 
 class SecondaryReadTuple(BaseTuple):
     def __init__(self, cursor):
+        self._cursor = cursor
         super(SecondaryReadTuple, self).__init__(
             sec_read_tuple_create(cursor))
+
+    def getClusterKeyTuple(self):
+        cluster_key_tuple = libinnodb.ib_tpl_t()
+        tuple_get_cluster_key(self._cursor, byref(cluster_key_tuple), self._tuple)
+        return _ClusterSearchTuple(cluster_key_tuple)
 
 class SecondarySearchTuple(BaseTuple):
     def __init__(self, cursor):
