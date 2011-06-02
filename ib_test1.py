@@ -69,7 +69,7 @@ def create_table(dbname, name):
 
 def open_table(dbname, name, ib_trx, crsr):
     table_name = '%s/%s' % (dbname, name)
-    innodb.cursor_open_table(table_name, ib_trx, crsr)
+    innodb.cursor_open_table(table_name, ib_trx, byref(crsr))
 
 def insert_rows(crsr):
     tpl = innodb.clust_read_tuple_create(crsr)
@@ -169,7 +169,7 @@ def main():
     ib_trx = innodb.trx_begin(libinnodb.IB_TRX_REPEATABLE_READ)
     assert ib_trx
     print 'Open cursor'
-    open_table(DATABASE, TABLE, ib_trx, byref(crsr))
+    open_table(DATABASE, TABLE, ib_trx, crsr)
     print 'Lock table in IX'
     innodb.cursor_lock(crsr, libinnodb.IB_LOCK_IX)
     print 'Insert rows'
