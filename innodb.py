@@ -544,7 +544,6 @@ class BaseCursor(object):
 
 class TableCursor(BaseCursor):
     def __init__(self, table, transaction, read_only=False):
-        self._table = table
         self._cursor = cursor = libinnodb.ib_crsr_t()
         cursor_open_table(table, transaction._txn_id,
             ctypes.byref(cursor))
