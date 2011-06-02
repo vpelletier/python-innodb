@@ -31,6 +31,7 @@ def database_create(name):
         raise InnoDBError(libinnodb.DB_ERROR)
 
 cfg_set_int = libinnodb.ib_cfg_set_int
+cfg_set_bool = libinnodb.ib_cfg_set_bool
 cfg_set_bool_on = libinnodb.ib_cfg_set_bool_on
 cfg_set_bool_off = libinnodb.ib_cfg_set_bool_off
 cfg_set_text = libinnodb.ib_cfg_set_text
@@ -152,12 +153,12 @@ _is_initialised = False
 _is_started = False
 
 _option_dict = {
-    libinnodb.IB_CFG_IBOOL: (libinnodb.ib_cfg_set_bool, libinnodb.ib_bool_t),
-    libinnodb.IB_CFG_ULINT: (libinnodb.ib_cfg_set_int, libinnodb.ib_ulint_t),
+    libinnodb.IB_CFG_IBOOL: (cfg_set_bool, libinnodb.ib_bool_t),
+    libinnodb.IB_CFG_ULINT: (cfg_set_int, libinnodb.ib_ulint_t),
     # XXX: not explicitely mentioned in specs
-    libinnodb.IB_CFG_ULONG: (libinnodb.ib_cfg_set_int, libinnodb.ib_ulint_t),
-    libinnodb.IB_CFG_TEXT: (libinnodb.ib_cfg_set_text, ctypes.c_char_p),
-    libinnodb.IB_CFG_CB: (libinnodb.ib_cfg_set_callback, libinnodb.ib_cb_t),
+    libinnodb.IB_CFG_ULONG: (cfg_set_int, libinnodb.ib_ulint_t),
+    libinnodb.IB_CFG_TEXT: (cfg_set_text, ctypes.c_char_p),
+    libinnodb.IB_CFG_CB: (cfg_set_callback, libinnodb.ib_cb_t),
 }
 
 _status_var_name_list = [
@@ -571,7 +572,7 @@ class BaseTuple(object):
     def _update(self):
         self._col_data_list = col_data_list = []
         col_data_append = col_data_list.append
-        for index in xrange(libinnodb.ib_tuple_get_n_cols(self._tuple)):
+        for index in xrange(tuple_get_n_cols(self._tuple)):
             data_len, col_meta = col_get_meta(self._tuple, index)
             if col_meta.type == libinnodb.IB_SYS:
                 continue
