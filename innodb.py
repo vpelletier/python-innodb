@@ -295,6 +295,9 @@ class Table(object):
     def drop(self, transaction):
         table_drop(transaction._txn_id, self._name)
 
+    def dropIndex(self, transaction, name):
+        index_drop(transaction._txn_id, self._getIndexId(name))
+
     def truncate(self):
         table_id = libinnodb.ib_id_t()
         table_truncate(self._name, ctypes.byref(table_id))
@@ -318,6 +321,11 @@ class Table(object):
             ctypes.byref(index_schema_id))
         return IndexSchema(index_schema_id, True, column_list, clustered,
             unique)
+
+    def _getIndexId(self, name):
+        index_id = libinnodb.ib_id_t()
+        index_get_id(self._name, name, ctypes.byref(ib_id_t))
+        return index_id.value
 
 class Transaction(object):
     _txn_id = None
