@@ -160,6 +160,57 @@ _option_dict = {
     libinnodb.IB_CFG_CB: (libinnodb.ib_cfg_set_callback, libinnodb.ib_cb_t),
 }
 
+_status_var_name_list = [
+    # I/O
+    "read_req_pending",
+    "write_req_pending",
+    "fsync_req_pending",
+    "write_req_done",
+    "read_req_done",
+    "fsync_req_done",
+    "bytes_total_written",
+    "bytes_total_read",
+    # Buffer pool
+    "buffer_pool_current_size",
+    "buffer_pool_data_pages",
+    "buffer_pool_dirty_pages",
+    "buffer_pool_misc_pages",
+    "buffer_pool_free_pages",
+    "buffer_pool_read_reqs",
+    "buffer_pool_reads",
+    "buffer_pool_waited_for_free",
+    "buffer_pool_pages_flushed",
+    "buffer_pool_write_reqs",
+    "buffer_pool_total_pages",
+    "buffer_pool_pages_read",
+    "buffer_pool_pages_written",
+    # Double-write buffer
+    "double_write_pages_written",
+    "double_write_invoked",
+    # Log
+    "log_buffer_slot_waits",
+    "log_write_reqs",
+    "log_write_flush_count",
+    "log_bytes_written",
+    "log_fsync_req_done",
+    "log_write_req_pending",
+    "log_fsync_req_pending",
+    # Locks
+    "lock_row_waits",
+    "lock_row_waiting",
+    "lock_total_wait_time_in_secs",
+    "lock_wait_time_avg_in_secs",
+    "lock_max_wait_time_in_secs",
+    # Row operations
+    "row_total_read",
+    "row_total_inserted",
+    "row_total_updated",
+    "row_total_deleted",
+    # Miscellaneous
+    "page_size",
+    "have_atomic_builtins",
+]
+
 class InnoDB(object):
     def __init__(self):
         global _is_initialised
@@ -194,6 +245,15 @@ class InnoDB(object):
 
     def getOptionNameList(self):
         return cfg_get_all()
+
+    def getStatusDict(self):
+        result = {}
+        if _is_started:
+            value = libinnodb.ib_i64_t()
+            for key in _status_var_name_list:
+                status_get_i64(key, ctypes.byref(value))
+                result[key] = value.value
+        return result
 
     def __getitem__(self, name):
         _checkName(name)
