@@ -6,8 +6,10 @@ class InnoDBError(Exception):
     def __init__(self, error_code):
         self._error_code = error_code
         super(InnoDBError, self).__init__('%s (%s): %s',
-            libinnodb.db_err(error_code), error_code,
-            innodb.ib_strerror(error_code))
+            libinnodb.db_err(error_code),
+            error_code,
+            libinnodb.ib_strerror(error_code),
+        )
 
     def getErrorCode(self):
         return self._error_code
@@ -338,7 +340,7 @@ class Transaction(object):
         self._level = level
 
     def begin(self):
-        if _txn_id is not None:
+        if self._txn_id is not None:
             raise ValueError('Transaction already started')
         txn_id = trx_begin(self._level)
         if not txn_id:
