@@ -705,7 +705,7 @@ def ClusterSearchTuple(cursor):
 
 class _ClusterSearchTuple(BaseTuple):
     def __init__(self, tpl):
-        super(ClusterSearchTuple, self).__init__(tpl)
+        super(_ClusterSearchTuple, self).__init__(tpl)
 
 class SecondaryReadTuple(BaseTuple):
     def __init__(self, cursor):
