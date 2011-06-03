@@ -65,7 +65,8 @@ for func_name in dir(libinnodb):
     _global_dict[dest_func_name] = new_wrapper(func)
 
 if platform.system() == 'Windows':
-    # TODO
+    # TODO: until this is implemented, each cfg_get_all call will leak some
+    # memory.
     pass
 else:
     _wrapped_cfg_get_all = cfg_get_all
