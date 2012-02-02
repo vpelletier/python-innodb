@@ -317,7 +317,7 @@ class Database(object):
         """
         database_create(self._name)
 
-    def drop(sef):
+    def drop(self):
         """
         Delete current database (and all contained tables).
         """
