@@ -508,6 +508,8 @@ class IndexSchema(object):
            index_schema_delete(self._schema)
 
 class BaseCursor(object):
+    _cursor = None
+
     def __init__(self):
         raise NotImplementedError()
 
@@ -581,6 +583,7 @@ class BaseCursor(object):
 
     def close(self):
         cursor_close(self._cursor)
+        del self._cursor
 
     def setMatchMode(self, mode):
         cursor_set_match_mode(self._cursor, mode)
@@ -757,6 +760,7 @@ class BaseTuple(object):
     def __del__(self):
         if _is_started and self._tuple:
             libinnodb.ib_tuple_delete(self._tuple)
+            del self._tuple
 
 class ClusterReadTuple(BaseTuple):
     def __init__(self, cursor):
