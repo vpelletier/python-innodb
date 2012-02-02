@@ -68,7 +68,7 @@ for func_name in dir(libinnodb):
 
 if platform.system() == 'Windows':
     # TODO: until this is implemented, each cfg_get_all call will leak some
-    # memory.
+    # memory (also true for ib_status_get_all).
     pass
 else:
     _wrapped_cfg_get_all = cfg_get_all
@@ -82,6 +82,29 @@ else:
         result = [name_list[x] for x in xrange(number.value)]
         _free(name_list)
         return result
+
+    if hasattr(libinnodb, 'ib_status_get_all'):
+        _wrapped_status_get_all = status_get_all
+        def status_get_all():
+            number = libinnodb.ib_u32_t()
+            name_list = ctypes.POINTER(ctypes.c_char_p)()
+            _wrapped_status_get_all(ctypes.byref(name_list), ctypes.byref(number))
+            result = [name_list[x] for x in xrange(number.value)]
+            _free(name_list)
+            if result[-1] is None:
+                result.pop(-1)
+            return result
+
+    if hasattr(libinnodb, 'ib_get_index_stat_n_diff_key_vals'):
+        _wrapped_get_index_stat_n_diff_key_vals = get_index_stat_n_diff_key_vals
+        def get_index_stat_n_diff_key_vals(ib_crsr, index_name):
+            ncols = libinnodb.ib_u64_t()
+            n_diff = ctypes.POINTER(libinnodb.ib_i64_t)()
+            _wrapped_get_index_stat_n_diff_key_vals(ib_crsr, index_name,
+                ctypes.byref(ncols), ctypes.byref(n_diff))
+            result =[n_diff[x] for x in xrange(ncols.value)]
+            _free(n_diff)
+            return result
 
 _wrapped_tuple_read_float = tuple_read_float
 def tuple_read_float(tpl, i):
@@ -166,58 +189,64 @@ _option_dict = {
     libinnodb.IB_CFG_CB: (cfg_set_callback, libinnodb.ib_cb_t),
 }
 
-_status_var_name_list = [
-    # I/O
-    "read_req_pending",
-    "write_req_pending",
-    "fsync_req_pending",
-    "write_req_done",
-    "read_req_done",
-    "fsync_req_done",
-    "bytes_total_written",
-    "bytes_total_read",
-    # Buffer pool
-    "buffer_pool_current_size",
-    "buffer_pool_data_pages",
-    "buffer_pool_dirty_pages",
-    "buffer_pool_misc_pages",
-    "buffer_pool_free_pages",
-    "buffer_pool_read_reqs",
-    "buffer_pool_reads",
-    "buffer_pool_waited_for_free",
-    "buffer_pool_pages_flushed",
-    "buffer_pool_write_reqs",
-    "buffer_pool_total_pages",
-    "buffer_pool_pages_read",
-    "buffer_pool_pages_written",
-    # Double-write buffer
-    "double_write_pages_written",
-    "double_write_invoked",
-    # Log
-    "log_buffer_slot_waits",
-    "log_write_reqs",
-    "log_write_flush_count",
-    "log_bytes_written",
-    "log_fsync_req_done",
-    "log_write_req_pending",
-    "log_fsync_req_pending",
-    # Locks
-    "lock_row_waits",
-    "lock_row_waiting",
-    "lock_total_wait_time_in_secs",
-    "lock_wait_time_avg_in_secs",
-    "lock_max_wait_time_in_secs",
-    # Row operations
-    "row_total_read",
-    "row_total_inserted",
-    "row_total_updated",
-    "row_total_deleted",
-    # Miscellaneous
-    "page_size",
-    "have_atomic_builtins",
-]
+if hasattr(libinnodb, 'ib_status_get_all'):
+    print 'status_get_all'
+    _status_var_name_list = status_get_all()
+else:
+    _status_var_name_list = [
+        # I/O
+        "read_req_pending",
+        "write_req_pending",
+        "fsync_req_pending",
+        "write_req_done",
+        "read_req_done",
+        "fsync_req_done",
+        "bytes_total_written",
+        "bytes_total_read",
+        # Buffer pool
+        "buffer_pool_current_size",
+        "buffer_pool_data_pages",
+        "buffer_pool_dirty_pages",
+        "buffer_pool_misc_pages",
+        "buffer_pool_free_pages",
+        "buffer_pool_read_reqs",
+        "buffer_pool_reads",
+        "buffer_pool_waited_for_free",
+        "buffer_pool_pages_flushed",
+        "buffer_pool_write_reqs",
+        "buffer_pool_total_pages",
+        "buffer_pool_pages_read",
+        "buffer_pool_pages_written",
+        # Double-write buffer
+        "double_write_pages_written",
+        "double_write_invoked",
+        # Log
+        "log_buffer_slot_waits",
+        "log_write_reqs",
+        "log_write_flush_count",
+        "log_bytes_written",
+        "log_fsync_req_done",
+        "log_write_req_pending",
+        "log_fsync_req_pending",
+        # Locks
+        "lock_row_waits",
+        "lock_row_waiting",
+        "lock_total_wait_time_in_secs",
+        "lock_wait_time_avg_in_secs",
+        "lock_max_wait_time_in_secs",
+        # Row operations
+        "row_total_read",
+        "row_total_inserted",
+        "row_total_updated",
+        "row_total_deleted",
+        # Miscellaneous
+        "page_size",
+        "have_atomic_builtins",
+    ]
 
 class InnoDB(object):
+    _txn_interrupted_handler = None
+
     def __init__(self):
         global _is_initialised
         if not _is_initialised:
@@ -260,6 +289,14 @@ class InnoDB(object):
                 status_get_i64(key, ctypes.byref(value))
                 result[key] = value.value
         return result
+
+    def setTrxIsInterruptedHandler(self, handler):
+        libinnodb.ib_set_trx_is_interrupted_handler(
+            libinnodb.ib_trx_is_interrupted_handler_t(handler))
+        self._txn_interrupted_handler = handler
+
+    def errorInject(self, error_to_inject):
+        error_inject(error_to_inject)
 
     def __getitem__(self, name):
         _checkName(name)
@@ -395,6 +432,12 @@ class Transaction(object):
 
     def unlockSchema(self):
         schema_unlock(self._txn_id)
+
+    def getDuplicateKey(self):
+        table = ctypes.c_char_p()
+        column = ctypes.c_char_p()
+        get_duplicate_key(self._txn_id, ctypes.byref(table), ctypes.byref(column))
+        return table.value, column.value
 
     def __del__(self):
         if _is_started and self._txn_id is not None:
@@ -582,6 +625,24 @@ class TableCursor(BaseCursor):
 
     def delete(self):
         cursor_delete_row(self._cursor)
+
+    def getTableStatistics(self):
+        stats = libinnodb.ib_table_stats_t()
+        get_table_statistics(self._cursor, ctypes.byref(stats),
+            ctypes.sizeof(stats))
+        return {
+            'stat_n_rows': stats.stat_n_rows,
+            'stat_clustered_index_size': stats.stat_clustered_index_size,
+            'stat_sum_of_other_index_sizes':
+                stats.stat_sum_of_other_index_sizes,
+            'stat_modified_counter': stats.stat_modified_counter,
+        }
+
+    def getIndexStatNDiffKeyVals(self, index_name):
+        return get_index_stat_n_diff_key_vals(self._cursor, index_name)
+
+    def updateTableStatistics(self):
+        update_table_statistics(self._cursor)
 
 class IndexCursor(BaseCursor):
     def __init__(self, index_id, transaction, read_only=False):

@@ -13,11 +13,13 @@ def _loadLibrary():
     system = platform.system()
     if system == 'Linux':
         dll_loader = CDLL
-        path = util.find_library('innodb')
+        path = util.find_library('haildb')
+        if path is None:
+            path = util.find_library('innodb')
     else:
         raise NotImplementedError('System not supported: %r' % (system, ))
     if path is None:
-        raise Exception('Can\'t locate innodb library')
+        raise Exception('Can\'t locate haildb/innodb library')
     return dll_loader(path, **_func_type_kw)
 
 def FUNCTYPE(*args):
@@ -275,7 +277,12 @@ def ib_tbl_sch_add_u64_notnull_col(s, n):
     return ib_table_schema_add_col(s, n, IB_INT,
         IB_COL_NOT_NULL | IB_COL_UNSIGNED, 0, 8)
 
-ib_client_compare = ib_client_cmp_t.in_dll(libinnodb, 'ib_client_compare')
+try:
+    ib_client_compare = ib_client_cmp_t.in_dll(libinnodb, 'ib_client_compare')
+except ValueError:
+    # Looks like some builds lack the extern.
+    # See ib_set_client_compare if you still need this feature.
+    pass
 
 ib_api_version = libinnodb.ib_api_version
 ib_api_version.restype = ib_u64_t
@@ -729,4 +736,77 @@ ib_strerror.argtypes = [ib_err_t]
 ib_status_get_i64 = libinnodb.ib_status_get_i64
 ib_status_get_i64.restype = ib_err_t
 ib_status_get_i64.argtypes = [c_char_p, POINTER(ib_i64_t)]
+
+try:
+    ib_status_get_all = libinnodb.ib_status_get_all
+except AttributeError:
+    pass
+else:
+    ib_status_get_all.restype = ib_err_t
+    ib_status_get_all.argtypes = [POINTER(POINTER(c_char_p)), POINTER(ib_u32_t)]
+
+#try:
+#    ib_set_panic_handler = libinnodb.ib_set_panic_handler
+#except AttributeError:
+#    pass
+#else:
+#    ib_panic_handler_t = FUNCTYPE(None, c_void_p, c_int, c_char_p) # XXX: needs va_arg
+#    ib_set_panic_handler.restype = None
+#    ib_set_panic_handler.argtypes = [ib_panic_handler_t]
+
+try:
+    ib_set_trx_is_interrupted_handler = libinnodb.ib_set_trx_is_interrupted_handler
+except AttributeError:
+    pass
+else:
+    ib_trx_is_interrupted_handler_t = FUNCTYPE(c_int, c_void_p)
+    ib_set_trx_is_interrupted_handler.restype = None
+    ib_set_trx_is_interrupted_handler.argtypes = [ib_trx_is_interrupted_handler_t]
+
+try:
+    ib_get_duplicate_key = libinnodb.ib_get_duplicate_key
+except AttributeError:
+    pass
+else:
+    ib_get_duplicate_key.restype = ib_err_t
+    ib_get_duplicate_key.argtypes = [ib_trx_t, POINTER(c_char_p), POINTER(c_char_p)]
+
+try:
+    ib_get_table_statistics = libinnodb.ib_get_table_statistics
+except AttributeError:
+    pass
+else:
+    class ib_table_stats_t(Structure):
+        _fields_ = [
+            ('stat_n_rows', ib_i64_t),
+            ('stat_clustered_index_size', ib_i64_t),
+            ('stat_sum_of_other_index_sizes', ib_i64_t),
+            ('stat_modified_counter', ib_i64_t),
+        ]
+    ib_get_table_statistics.restype = ib_err_t
+    ib_get_table_statistics.argtypes = [ib_crsr_t, POINTER(ib_table_stats_t), c_size_t]
+
+try:
+    ib_get_index_stat_n_diff_key_vals = libinnodb.ib_get_index_stat_n_diff_key_vals
+except AttributeError:
+    pass
+else:
+    ib_get_index_stat_n_diff_key_vals.restype = ib_err_t
+    ib_get_index_stat_n_diff_key_vals.argtypes = [ib_crsr_t, c_char_p, POINTER(ib_u64_t), POINTER(POINTER(ib_i64_t))]
+
+try:
+    ib_update_table_statistics = libinnodb.ib_update_table_statistics
+except AttributeError:
+    pass
+else:
+    ib_update_table_statistics.restype = ib_err_t
+    ib_update_table_statistics.argtypes = [ib_crsr_t]
+
+try:
+    ib_error_inject = libinnodb.ib_error_inject
+except AttributeError:
+    pass
+else:
+    ib_error_inject.restype = ib_err_t
+    ib_error_inject.argtypes = [c_int]
 
