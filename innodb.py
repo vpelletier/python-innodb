@@ -722,7 +722,8 @@ class BaseTuple(object):
         elif col_type == libinnodb.IB_DOUBLE:
             result = tuple_read_double(self._tuple, index)
         elif col_type in (libinnodb.IB_CHAR, libinnodb.IB_BLOB,
-                libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR):
+                libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR,
+                libinnodb.IB_BINARY, libinnodb.IB_VARBINARY):
             result = ctypes.string_at(col_get_value(
                 self._tuple, index), data_len)
         else:
@@ -743,7 +744,8 @@ class BaseTuple(object):
         elif col_type == libinnodb.IB_DOUBLE:
             tuple_write_double(self._tuple, index, value)
         elif col_type in (libinnodb.IB_CHAR, libinnodb.IB_BLOB,
-                libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR):
+                libinnodb.IB_DECIMAL, libinnodb.IB_VARCHAR,
+                libinnodb.IB_BINARY, libinnodb.IB_VARBINARY):
             col_set_value(self._tuple, index, value, len(value))
         else:
             raise NotImplementedError(repr(col_type))
