@@ -14,7 +14,7 @@ def create_table(txn, table):
         ('c2', libinnodb.IB_VARCHAR, 31),
         ('c3', libinnodb.IB_INT, 4, libinnodb.IB_COL_UNSIGNED),
     ))
-    index_schema = table_sch.newIndex('c1_c2', (('c1', ), ('c2', )),
+    table_sch.newIndex('c1_c2', (('c1', ), ('c2', )),
         clustered=True)
     table_sch.create(txn)
     txn.commit()
