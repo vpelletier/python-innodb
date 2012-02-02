@@ -190,7 +190,6 @@ _option_dict = {
 }
 
 if hasattr(libinnodb, 'ib_status_get_all'):
-    print 'status_get_all'
     _status_var_name_list = status_get_all()
 else:
     _status_var_name_list = [
