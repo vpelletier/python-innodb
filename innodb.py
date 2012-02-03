@@ -288,8 +288,9 @@ class InnoDB(object):
         result = {}
         if _is_started:
             value = libinnodb.ib_i64_t()
+            value_p = ctypes.byref(value)
             for key in _status_var_name_list:
-                status_get_i64(key, ctypes.byref(value))
+                status_get_i64(key, value_p)
                 result[key] = value.value
         return result
 
