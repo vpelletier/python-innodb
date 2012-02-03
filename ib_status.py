@@ -7,8 +7,7 @@ def main():
     idb = innodb.InnoDB()
     idb.startup('barracuda')
 
-    for name in idb.getOptionNameList():
-        print idb.getOptionType(name), '\t', idb.getOption(name), '\t', name
+    pprint(idb.getOptionDict())
     pprint(idb.getStatusDict())
 
     idb.shutdown()

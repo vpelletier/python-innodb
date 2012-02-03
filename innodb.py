@@ -280,6 +280,10 @@ class InnoDB(object):
     def getOptionNameList(self):
         return cfg_get_all()
 
+    def getOptionDict(self):
+        getOption = self.getOption
+        return dict((x, getOption(x)) for x in self.getOptionNameList())
+
     def getStatusDict(self):
         result = {}
         if _is_started:
