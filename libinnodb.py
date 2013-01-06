@@ -631,12 +631,35 @@ ib_cfg_var_get_type.restype = ib_err_t
 ib_cfg_var_get_type.argtypes = [c_char_p, POINTER(ib_cfg_type_t)]
 
 _ib_cfg_set = libinnodb.ib_cfg_set
-_ib_cfg_set.restype = ib_err_t
+# XXX: due to lack of support for va_arg in ctypes (highly non-trivial to
+# implement), use an intermediate wrapper C library.
+def _open_devaarg():
+    import os.path
+    return CDLL(os.path.join(os.path.dirname(__file__), 'devaarg.so.1.0'))
+_devaarg = _open_devaarg()
+del _open_devaarg
+_devaarg_charp__int = _devaarg.charp__int
+_devaarg_charp__int.restype = c_void_p
+_devaarg_charp__int.argtypes = [c_void_p, c_char_p, c_int]
+
+_devaarg_charp__ulint = _devaarg.charp__ulint 
+_devaarg_charp__ulint.restype = c_void_p
+_devaarg_charp__ulint.argtypes = [c_void_p, c_char_p, c_ulong]
+
+_devaarg_charp__charp = _devaarg.charp__charp
+_devaarg_charp__charp.restype = c_void_p
+_devaarg_charp__charp.argtypes = [c_void_p, c_char_p, c_char_p]
+
+#_devaarg_charp__voidp = _devaarg.charp__voidp
+#_devaarg_charp__voidp.restype = c_void_p
+#_devaarg_charp__voidp.argtypes = [c_void_p, c_char_p, c_void_p]
+#del _devaarg
+
 def ib_cfg_set_int(name, v):
-    return _ib_cfg_set(name, v)
+    return _devaarg_charp__int(_ib_cfg_set, name, v)
 
 def ib_cfg_set_bool(name, v):
-    return _ib_cfg_set(name, v)
+    return _devaarg_charp__ulint(_ib_cfg_set, name, v)
 
 def ib_cfg_set_bool_on(name):
     return ib_cfg_set_bool(name, IB_TRUE)
@@ -645,10 +668,10 @@ def ib_cfg_set_bool_off(name):
     return ib_cfg_set_bool(name, IB_FALSE)
 
 def ib_cfg_set_text(name, v):
-    return _ib_cfg_set(name, v)
+    return _devaarg_charp__charp(_ib_cfg_set, name, v)
 
 def ib_cfg_set_callback(name, v):
-    return _ib_cfg_set(name, v)
+    return _devaarg_charp__voidp(_ib_cfg_set, name, v)
 
 ib_cfg_get = libinnodb.ib_cfg_get
 ib_cfg_get.restype = ib_err_t
