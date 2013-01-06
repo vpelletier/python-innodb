@@ -31,50 +31,50 @@ del _loadLibrary
 
 db_err = Enum(globals(), [
     ('DB_SUCCESS', 10),
-    ('DB_ERROR', None),
-    ('DB_INTERRUPTED', None),
-    ('DB_OUT_OF_MEMORY', None),
-    ('DB_OUT_OF_FILE_SPACE', None),
-    ('DB_LOCK_WAIT', None),
-    ('DB_DEADLOCK', None),
-    ('DB_ROLLBACK', None),
-    ('DB_DUPLICATE_KEY', None),
-    ('DB_QUE_THR_SUSPENDED', None),
-    ('DB_MISSING_HISTORY', None),
+    'DB_ERROR',
+    'DB_INTERRUPTED',
+    'DB_OUT_OF_MEMORY',
+    'DB_OUT_OF_FILE_SPACE',
+    'DB_LOCK_WAIT',
+    'DB_DEADLOCK',
+    'DB_ROLLBACK',
+    'DB_DUPLICATE_KEY',
+    'DB_QUE_THR_SUSPENDED',
+    'DB_MISSING_HISTORY',
     ('DB_CLUSTER_NOT_FOUND', 30),
-    ('DB_TABLE_NOT_FOUND', None),
-    ('DB_MUST_GET_MORE_FILE_SPACE', None),
-    ('DB_TABLE_IS_BEING_USED', None),
-    ('DB_TOO_BIG_RECORD', None),
-    ('DB_LOCK_WAIT_TIMEOUT', None),
-    ('DB_NO_REFERENCED_ROW', None),
-    ('DB_ROW_IS_REFERENCED', None),
-    ('DB_CANNOT_ADD_CONSTRAINT', None),
-    ('DB_CORRUPTION', None),
-    ('DB_COL_APPEARS_TWICE_IN_INDEX', None),
-    ('DB_CANNOT_DROP_CONSTRAINT', None),
-    ('DB_NO_SAVEPOINT', None),
-    ('DB_TABLESPACE_ALREADY_EXISTS', None),
-    ('DB_TABLESPACE_DELETED', None),
-    ('DB_LOCK_TABLE_FULL', None),
-    ('DB_FOREIGN_DUPLICATE_KEY', None),
-    ('DB_TOO_MANY_CONCURRENT_TRXS', None),
-    ('DB_UNSUPPORTED', None),
-    ('DB_PRIMARY_KEY_IS_NULL', None),
-    ('DB_FATAL', None),
+    'DB_TABLE_NOT_FOUND',
+    'DB_MUST_GET_MORE_FILE_SPACE',
+    'DB_TABLE_IS_BEING_USED',
+    'DB_TOO_BIG_RECORD',
+    'DB_LOCK_WAIT_TIMEOUT',
+    'DB_NO_REFERENCED_ROW',
+    'DB_ROW_IS_REFERENCED',
+    'DB_CANNOT_ADD_CONSTRAINT',
+    'DB_CORRUPTION',
+    'DB_COL_APPEARS_TWICE_IN_INDEX',
+    'DB_CANNOT_DROP_CONSTRAINT',
+    'DB_NO_SAVEPOINT',
+    'DB_TABLESPACE_ALREADY_EXISTS',
+    'DB_TABLESPACE_DELETED',
+    'DB_LOCK_TABLE_FULL',
+    'DB_FOREIGN_DUPLICATE_KEY',
+    'DB_TOO_MANY_CONCURRENT_TRXS',
+    'DB_UNSUPPORTED',
+    'DB_PRIMARY_KEY_IS_NULL',
+    'DB_FATAL',
     ('DB_FAIL', 1000),
-    ('DB_OVERFLOW', None),
-    ('DB_UNDERFLOW', None),
-    ('DB_STRONG_FAIL', None),
-    ('DB_ZIP_OVERFLOW', None),
+    'DB_OVERFLOW',
+    'DB_UNDERFLOW',
+    'DB_STRONG_FAIL',
+    'DB_ZIP_OVERFLOW',
     ('DB_RECORD_NOT_FOUND', 1500),
-    ('DB_END_OF_INDEX', None),
+    'DB_END_OF_INDEX',
     ('DB_SCHEMA_ERROR', 2000),
-    ('DB_DATA_MISMATCH', None),
-    ('DB_SCHEMA_NOT_LOCKED', None),
-    ('DB_NOT_FOUND', None),
-    ('DB_READONLY', None),
-    ('DB_INVALID_INPUT', None),
+    'DB_DATA_MISMATCH',
+    'DB_SCHEMA_NOT_LOCKED',
+    'DB_NOT_FOUND',
+    'DB_READONLY',
+    'DB_INVALID_INPUT',
 ])
 
 IB_TRUE = 1
@@ -108,11 +108,11 @@ assert sizeof(ib_u64_t) == 8
 ib_id_t = ib_u64_t
 
 ib_cfg_type = Enum(globals(), [
-    ('IB_CFG_IBOOL', None),
-    ('IB_CFG_ULINT', None),
-    ('IB_CFG_ULONG', None),
-    ('IB_CFG_TEXT', None),
-    ('IB_CFG_CB', None),
+    'IB_CFG_IBOOL',
+    'IB_CFG_ULINT',
+    'IB_CFG_ULONG',
+    'IB_CFG_TEXT',
+    'IB_CFG_CB',
 ])
 ib_cfg_type_t = c_int # XXX: unsure
 
@@ -133,10 +133,10 @@ ib_col_type = Enum(globals(), [
 ib_col_type_t = c_int # XXX: unsure
 
 ib_tbl_fmt = Enum(globals(), [
-    ('IB_TBL_REDUNDANT', None),
-    ('IB_TBL_COMPACT', None),
-    ('IB_TBL_DYNAMIC', None),
-    ('IB_TBL_COMPRESSED', None),
+    'IB_TBL_REDUNDANT',
+    'IB_TBL_COMPACT',
+    'IB_TBL_DYNAMIC',
+    'IB_TBL_COMPRESSED',
 ])
 ib_tbl_fmt_t = c_int # XXX: unsure
 
@@ -153,11 +153,11 @@ ib_col_attr_t = c_int # XXX: unsure
 
 ib_lck_mode = Enum(globals(), [
     ('IB_LOCK_IS', 0),
-    ('IB_LOCK_IX', None),
-    ('IB_LOCK_S', None),
-    ('IB_LOCK_X', None),
-    ('IB_LOCK_NOT_USED', None),
-    ('IB_LOCK_NONE', None),
+    'IB_LOCK_IX',
+    'IB_LOCK_S',
+    'IB_LOCK_X',
+    'IB_LOCK_NOT_USED',
+    'IB_LOCK_NONE',
 ])
 IB_LOCK_NUM = IB_LOCK_NONE
 ib_lck_mode_t = c_int # XXX: unsure
@@ -171,9 +171,9 @@ ib_srch_mode = Enum(globals(), [
 ib_srch_mode_t = c_int # XXX: unsure
 
 ib_match_mode = Enum(globals(), [
-    ('IB_CLOSEST_MATCH', None),
-    ('IB_EXACT_MATCH', None),
-    ('IB_EXACT_PREFIX', None),
+    'IB_CLOSEST_MATCH',
+    'IB_EXACT_MATCH',
+    'IB_EXACT_PREFIX',
 ])
 ib_match_mode_t = c_int # XXX: unsure
 
@@ -187,10 +187,10 @@ class ib_col_meta_t(Structure):
     ]
 
 ib_trx_state = Enum(globals(), [
-    ('IB_TRX_NOT_STARTED', None),
-    ('IB_TRX_ACTIVE', None),
-    ('IB_TRX_COMMITTED_IN_MEMORY', None),
-    ('IB_TRX_PREPARED', None),
+    'IB_TRX_NOT_STARTED',
+    'IB_TRX_ACTIVE',
+    'IB_TRX_COMMITTED_IN_MEMORY',
+    'IB_TRX_PREPARED',
 ])
 ib_trx_state_t = c_int # XXX: unsure
 
@@ -203,9 +203,9 @@ ib_trx_level = Enum(globals(), [
 ib_trx_level_t = c_int # XXX: unsure
 
 ib_shutdown = Enum(globals(), [
-    ('IB_SHUTDOWN_NORMAL', None),
-    ('IB_SHUTDOWN_NO_IBUFMERGE_PURGE', None),
-    ('IB_SHUTDOWN_NO_BUFPOOL_FLUSH', None),
+    'IB_SHUTDOWN_NORMAL',
+    'IB_SHUTDOWN_NO_IBUFMERGE_PURGE',
+    'IB_SHUTDOWN_NO_BUFPOOL_FLUSH',
 ])
 ib_shutdown_t = c_int # XXX: unsure
 
