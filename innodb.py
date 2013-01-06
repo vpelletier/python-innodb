@@ -374,6 +374,17 @@ class Table(object):
         index_get_id(self._name, name, ctypes.byref(ib_id_t))
         return index_id.value
 
+    def exists(self):
+        index_id = libinnodb.ib_id_t()
+        try:
+            table_get_id(self._name, ctypes.byref(index_id))
+        except InnoDBError, err:
+            if err.getErrorCode() == libinnodb.DB_TABLE_NOT_FOUND:
+                return False
+            raise
+        else:
+            return True
+
 class Transaction(object):
     _txn_id = None
 
