@@ -62,9 +62,8 @@ for func_name in dir(libinnodb):
     if dest_func_name in _global_dict:
         continue
     func = getattr(libinnodb, func_name)
-    if getattr(func, 'restype', None) is not ib_err_t:
-        continue
-    _global_dict[dest_func_name] = new_wrapper(func)
+    if getattr(func, 'restype', None) is ib_err_t:
+        _global_dict[dest_func_name] = new_wrapper(func)
 
 if platform.system() == 'Windows':
     # TODO: until this is implemented, each cfg_get_all call will leak some
